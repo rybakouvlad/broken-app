@@ -1,5 +1,5 @@
-const Sequelize = require("sequelize");
-require("dotenv").config();
+const Sequelize = require('sequelize');
+require('dotenv').config();
 
 const sequelize = new Sequelize(
   process.env.DB,
@@ -7,18 +7,19 @@ const sequelize = new Sequelize(
   process.env.DB_PASSWORD,
   {
     host: process.env.DB_HOST,
-    dialect: "postgres",
+    dialect: 'postgres',
+    operatorsAliases: false,
   }
 );
-
-sequelize.authenticate().then(
-  () => {
-    console.log("Connected to DB");
-  },
-
-  (err) => {
-    console.log(`Error: ${err}`);
+const run = async () => {
+  try {
+   await sequelize.authenticate();
+    console.log('Connected to DB');
+  } catch (e) {
+    console.log(`Error ${e}`);
   }
-);
+};
+
+run();
 
 module.exports = sequelize;

@@ -1,5 +1,7 @@
 const router = require('express').Router();
-const Game = require('../models/game');
+const db = require('../db');
+
+const Game = require('../models/game')(db);
 
 router.get('/all', (req, res) => {
   Game.findAll({ where: { owner_id: req.user.id } }).then(
