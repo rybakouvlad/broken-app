@@ -12,11 +12,11 @@ const sequelize = new Sequelize(
 );
 
 sequelize.authenticate().then(
-  function success() {
+  () => {
     console.log("Connected to DB");
   },
 
-  function fail(err) {
+  (err) => {
     console.log(`Error: ${err}`);
   }
 );

@@ -11,17 +11,17 @@ router.post('/signup', (req, res) => {
     passwordhash: bcrypt.hashSync(req.body.user.password, 10),
     email: req.body.user.email,
   }).then(
-    function signupSuccess(user) {
+    (user) => {
       const token = jwt.sign({ id: user.id }, 'lets_play_sum_games_man', {
         expiresIn: 60 * 60 * 24,
       });
       res.status(200).json({
-        user: user,
-        token: token,
+        user,
+        token,
       });
     },
 
-    function signupFail(err) {
+    (err) => {
       res.status(500).send(err.message);
     }
   );
@@ -33,13 +33,13 @@ router.post('/signin', (req, res) => {
       bcrypt.compare(
         req.body.user.password,
         user.passwordHash,
-        function (err, matches) {
+        (err, matches) => {
           if (matches) {
             const token = jwt.sign({ id: user.id }, 'lets_play_sum_games_man', {
               expiresIn: 60 * 60 * 24,
             });
             res.json({
-              user: user,
+              user,
               message: 'Successfully authenticated.',
               sessionToken: token,
             });
