@@ -11,7 +11,7 @@ const sequelize = new Sequelize(
     operatorsAliases: false,
   }
 );
-const run = async () => {
+const check = async () => {
   try {
    await sequelize.authenticate();
     console.log('Connected to DB');
@@ -20,6 +20,6 @@ const run = async () => {
   }
 };
 
-run();
+check();
 
 module.exports = sequelize;

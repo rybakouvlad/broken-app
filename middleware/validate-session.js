@@ -3,7 +3,7 @@ const db = require('../db');
 
 const User = require('../models/user')(db);
 
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
   if (req.method === 'OPTIONS') {
     next(); // allowing options as a method for request
   } else {
@@ -13,26 +13,22 @@ module.exports = (req, res, next) => {
     if (!token)
       res.status(403).send({ auth: false, message: 'No token provided.' });
 
-    jwt.verify(
-      token,
-      'lets_play_sum_games_man',
-      (err, decoded) => {
-        console.log('DECODE', decoded);
-        if (decoded) {
-          User.findOne({ where: { id: decoded.id } }).then(
-            (user) => {
-              req.user = user;
-              console.log(`user: ${user}`);
-              next();
-            },
-            () => {
-              res.status(401).send({ error: 'not authorized' });
-            }
-          );
-        } else {
-          res.status(400).send({ error: 'not authorized' });
-        }
+    jwt.verify(token, 'lets_play_sum_games_man', async (err, decoded) => {
+      if (decoded) {
+        User.findOne({ where: { id: decoded.id } }).then(
+          (user) => {
+            const result = user.toJSON();
+            req.user = result;
+
+            next();
+          },
+          () => {
+            res.status(401).send({ error: 'not authorized' });
+          }
+        );
+      } else {
+        res.status(400).send({ error: 'not authorized' });
       }
-    );
+    });
   }
 };
