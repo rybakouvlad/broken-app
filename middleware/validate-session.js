@@ -1,29 +1,34 @@
 const jwt = require('jsonwebtoken');
-var User = require('sequelize').import('../models/user');
+const db = require('../db');
 
-module.exports = function (req, res, next) {
-    if (req.method == 'OPTIONS') {
-        next();   // allowing options as a method for request
-    } else {
-        var sessionToken = req.headers.authorization;
-        console.log(sessionToken);
-        if (!sessionToken) return res.status(403).send({ auth: false, message: "No token provided." });
-        else {
-            jwt.verify(sessionToken, 'lets_play_sum_games_man', (err, decoded) => {
-                if (decoded) {
-                    User.findOne({ where: { id: decoded.id } }).then(user => {
-                        req.user = user;
-                        console.log(`user: ${user}`)
-                        next()
-                    },
-                        function () {
-                            res.status(401).send({ error: "not authorized" });
-                        })
+const User = require('../models/user')(db);
 
-                } else {
-                    res.status(400).send({ error: "not authorized" })
-                }
-            });
-        }
-    }
-}
+module.exports = async (req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    next(); // allowing options as a method for request
+  } else {
+    const sessionToken = req.headers.authorization;
+    console.log('TOKEN', sessionToken.split(' '));
+    const token = sessionToken.split(' ')[1];
+    if (!token)
+      res.status(403).send({ auth: false, message: 'No token provided.' });
+
+    jwt.verify(token, 'lets_play_sum_games_man', async (err, decoded) => {
+      if (decoded) {
+        User.findOne({ where: { id: decoded.id } }).then(
+          (user) => {
+            const result = user.toJSON();
+            req.user = result;
+
+            next();
+          },
+          () => {
+            res.status(401).send({ error: 'not authorized' });
+          }
+        );
+      } else {
+        res.status(400).send({ error: 'not authorized' });
+      }
+    });
+  }
+};
